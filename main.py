@@ -8,6 +8,9 @@ import os
 api_key = API_KEY
 d = DoodStream(api_key)
 
+#Print a message to indicate the start of the upload process
+print("Uploading Please Wait...")
+
 # Uploading File From Local Storage
 # Get the current directory
 current_directory = os.path.dirname(os.path.realpath(__file__))
@@ -16,33 +19,35 @@ upload_directory = os.path.join(current_directory, 'upload')
 # Get the list of files in the upload directory
 files = os.listdir(upload_directory)
 
-# Loop through each file in the upload directory
-for file in files:
-    # Construct the full file path
-    file_path = os.path.join(upload_directory, file)
-    # Upload the file
-    response = d.local_upload(file_path)
+# Open the log file in append mode
+with open('Uploaded.txt', 'a') as log_file:
+    # Loop through each file in the upload directory
+    for file in files:
+        # Construct the full file path
+        file_path = os.path.join(upload_directory, file)
+        # Upload the file
+        response = d.local_upload(file_path)
 
-    # Check if the upload was successful (status code 200) before proceeding
-    if response['status'] == 200:
-        data = response['result']
-        for item in data:
-            thumb = item['splash_img']
-            status = item['status']
-            size = item['size']
-            title = item['title']
-            date = item['uploaded']
-            dow_url = item['download_url']
+        # Check if the upload was successful (status code 200) before proceeding
+        if response['status'] == 200:
+            data = response['result']
+            for item in data:
+                thumb = item['splash_img']
+                status = item['status']
+                size = item['size']
+                title = item['title']
+                date = item['uploaded']
+                dow_url = item['download_url']
 
-        # Print the results
-        print("====== Upload Results ======")
-        print("Title:", title)
-        print("Size: {} Bytes".format(size))
-        print("Date: {} UTC".format(date))
-        print("Thumbnail:", thumb)
-        print("Download URL:", dow_url)
-        print("Credit https://github.com/callmedimas/") #Please don't remove the credit :)
-        print("============================")
+            # Write the results to the log file
+            log_file.write("====== Upload Results ======\n")
+            log_file.write("Title: {}\n".format(title))
+            log_file.write("Size: {} Bytes\n".format(size))
+            log_file.write("Date: {} UTC\n".format(date))
+            log_file.write("Thumbnail: {}\n".format(thumb))
+            log_file.write("Download URL: {}\n".format(dow_url))
+            log_file.write("----------------------------\n")
 
-    else:
-        print("Error: Upload request failed with status", response['status'])
+        # Print a message to indicate if there any errors
+        else:
+            log_file.write("Error: Upload request failed with status {}\n".format(response['status']))
